@@ -83,7 +83,7 @@ def auto_canny(image, sigma=0.33):
 
 cv2.namedWindow('FPI Video')
 cap = cv2.VideoCapture(0)
-out = cv2.VideoWriter( time.strftime("%d_%m_%Y_at_%H_%M_%S") + '.avi',cv2.cv.CV_FOURCC(*'DIVX'), 20.0, (640,480))
+out = cv2.VideoWriter( time.strftime("%d_%m_%Y_at_%H_%M_%S") + '.avi',cv2.cv.CV_FOURCC(*'XVID'), 20.0, (640,480))
 
 apply_effects = apply_none # points to function to be applied
 apply_transforms = apply_none  # points to function to be applied
@@ -102,7 +102,7 @@ while(True):
     frame = apply_effects(frame)
 
     if(recording):
-        out.write(frame)
+        out.write(np.uint8(frame))
 
     # Display the resulting frame
     cv2.imshow('FPI Video',frame)
