@@ -38,21 +38,37 @@ def apply_laplacian(frame):
     return cv2.Laplacian(frame, cv2.CV_64F)
 
 def apply_negative(frame):
-    return cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    return cv2.addWeighted(frame, -1, np.zeros(frame.shape, frame.dtype), 0, 255)
 
 def nothing(x):
     pass
 
+def resize_video(frame):
+    return cv2.resize(frame, None, fx=1.0/2.0, fy=1.0/2.0, interpolation = cv2.INTER_CUBIC)
+
+def mirror_video(frame):
+    # Mirroring. 1 = horizontal, 0 = vertical, -1 = both
+    return cv2.flip(frame, mirroring_mode)
+
+def rotate_video(frame):
+    (h, w) = frame.shape[:2]
+    center = (w/2, h/2)
+    M = cv2.getRotationMatrix2D(center, rotation_mode * 90, 1.0)
+    return cv2.warpAffine(frame, M, (w,h))
+
 cv2.namedWindow('FPI Video')
 cap = cv2.VideoCapture(0)
 apply_effects = apply_none # points to function to be applied
+apply_transforms = apply_none  # points to function to be applied
+mirroring_mode = -1
+rotation_mode = 0
 
 while(True):
     # Capture frame-by-frame
     ret, frame = cap.read()
 
+    frame = apply_transforms(frame)
     frame = apply_effects(frame)
-    frame = cv2.flip(frame, 1) # Mirroring. 1 = horizontal, 0 = vertical, -1 = both
 
     # Display the resulting frame
     cv2.imshow('FPI Video',frame)
@@ -74,7 +90,13 @@ while(True):
     elif c == ord('l'):
         apply_effects = apply_laplacian
     elif c == ord('r'):
-        cv2.resize(frame, None, fx=2, fy=2, interpolation = cv2.INTER_CUBIC)
+        apply_transforms = resize_video
+    elif c == ord('m'):
+        mirroring_mode = (mirroring_mode%3) - 1
+        apply_transforms = mirror_video
+    elif c == ord('z'):
+        rotation_mode = (rotation_mode + 1) % 4
+        apply_transforms = rotate_video
 
 # When everything done, release the capture
 cap.release()
