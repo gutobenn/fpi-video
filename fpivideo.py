@@ -42,6 +42,12 @@ def apply_laplacian(frame):
 def apply_negative(frame):
     return cv2.addWeighted(frame, -1, np.zeros(frame.shape, frame.dtype), 0, 255)
 
+def apply_bright(frame):
+    return cv2.addWeighted(frame, 1, np.zeros(frame.shape, frame.dtype), 0, bright_value)
+
+def apply_contrast(frame):
+    return cv2.addWeighted(frame, contrast_value, np.zeros(frame.shape, frame.dtype), 0, 0)
+
 def nothing(x):
     pass
 
@@ -76,10 +82,14 @@ def auto_canny(image, sigma=0.33):
 
 cv2.namedWindow('FPI Video')
 cap = cv2.VideoCapture(0)
+
 apply_effects = apply_none # points to function to be applied
 apply_transforms = apply_none  # points to function to be applied
+
 mirroring_mode = -1
 rotation_mode = 0
+bright_value = 0
+contrast_value = 1
 
 while(True):
     # Capture frame-by-frame
@@ -97,12 +107,24 @@ while(True):
     elif c == ord('g'):
         apply_effects = apply_gaussian
         cv2.createTrackbar('Gaussian Kernel Size','FPI Video', 3, 19, nothing)
-    elif c == ord('c'):
+    elif c == ord('d'):
         apply_effects = apply_canny
     elif c == ord('s'):
         apply_effects = apply_sobel
     elif c == ord('x'):
         apply_effects = apply_grayscale
+    elif c == ord('b'):
+        bright_value = max(-255, bright_value - 3)
+        apply_effects = apply_bright
+    elif c == ord('B'):
+        bright_value = min(255, bright_value + 3)
+        apply_effects = apply_bright
+    elif c == ord('c'):
+        contrast_value = max(0.0, contrast_value - 0.1)
+        apply_effects = apply_contrast
+    elif c == ord('C'):
+        contrast_value = min(6.0, contrast_value + 0.1)
+        apply_effects = apply_contrast
     elif c == ord('n'):
         apply_effects = apply_negative
     elif c == ord('l'):
