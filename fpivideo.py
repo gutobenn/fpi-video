@@ -29,13 +29,12 @@ def apply_grayscale(frame):
     return cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
 def apply_canny(frame):
-    # TODO ajusar parametros
-    frame = cv2.GaussianBlur(frame, (3, 3), 0)
-    return cv2.Canny(frame, 25, 200)
+    blurred = cv2.GaussianBlur(frame, (3, 3), 0)
+    return auto_canny(blurred)
 
 def apply_sobel(frame):
-    # TODO é o sobel x ou xy?
-    return cv2.Sobel(frame, cv2.CV_64F, 1, 0, ksize=5) # Sobel X
+    return cv2.Sobel(frame, cv2.CV_64F, 1, 0, 3) # Sobel X
+    #return cv2.Sobel(frame, cv2.CV_64F, 0, 1, 3) # Sobel Y
 
 def apply_laplacian(frame):
     return cv2.Laplacian(frame, cv2.CV_64F)
@@ -62,6 +61,18 @@ def rotate_video(frame):
         M = cv2.getRotationMatrix2D(center, rotation_mode * 90, 1.0)
         frame = cv2.warpAffine(frame, M, (w,h))
     return frame
+
+def auto_canny(image, sigma=0.33):
+    # compute the median of the single channel pixel intensities
+    v = np.median(image)
+
+    # apply automatic Canny edge detection using the computed median
+    lower = int(max(0, (1.0 - sigma) * v))
+    upper = int(min(255, (1.0 + sigma) * v))
+    edged = cv2.Canny(image, lower, upper)
+
+    # return the edged image
+    return edged
 
 cv2.namedWindow('FPI Video')
 cap = cv2.VideoCapture(0)
