@@ -3,6 +3,7 @@
 
 import numpy as np
 import cv2
+import time
 
 """
 Basic real time video processing
@@ -82,6 +83,7 @@ def auto_canny(image, sigma=0.33):
 
 cv2.namedWindow('FPI Video')
 cap = cv2.VideoCapture(0)
+out = cv2.VideoWriter( time.strftime("%d_%m_%Y_at_%H_%M_%S") + '.avi',cv2.cv.CV_FOURCC(*'DIVX'), 20.0, (640,480))
 
 apply_effects = apply_none # points to function to be applied
 apply_transforms = apply_none  # points to function to be applied
@@ -90,6 +92,7 @@ mirroring_mode = -1
 rotation_mode = 0
 bright_value = 0
 contrast_value = 1
+recording = False
 
 while(True):
     # Capture frame-by-frame
@@ -97,6 +100,9 @@ while(True):
 
     frame = apply_transforms(frame)
     frame = apply_effects(frame)
+
+    if(recording):
+        out.write(frame)
 
     # Display the resulting frame
     cv2.imshow('FPI Video',frame)
@@ -130,22 +136,20 @@ while(True):
     elif c == ord('l'):
         apply_effects = apply_laplacian
     elif c == ord('r'):
-        apply_transforms = resize_video
+        if not recording:
+            apply_transforms = resize_video
     elif c == ord('m'):
         mirroring_mode = (mirroring_mode%3) - 1
+        print mirroring_mode
         apply_transforms = mirror_video
     elif c == ord('z'):
-        rotation_mode = (rotation_mode + 1) % 4
-        apply_transforms = rotate_video
+        if not recording:
+            rotation_mode = (rotation_mode + 1) % 4
+            apply_transforms = rotate_video
     elif c == ord('o'):
-        """
-        TODO gravacao video
-        w=int(capture.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH ))
-        h=int(capture.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT ))
-        fourcc = cv2.cv.CV_FOURCC(*'XVID')
-        video_writer = cv2.VideoWriter("output.avi", fourcc, 25, (w, h))
-        """
+        recording = True
 
 # When everything done, release the capture
 cap.release()
+out.release()
 cv2.destroyAllWindows()
