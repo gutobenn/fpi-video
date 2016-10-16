@@ -17,9 +17,12 @@ def apply_none(frame):
 
 def apply_gaussian(frame):
     ksize = cv2.getTrackbarPos('Gaussian Kernel Size','FPI Video')
+    if(ksize < 3):
+        ksize = 3
+        cv2.setTrackbarPos('Gaussian Kernel Size','FPI Video', ksize)
     if(ksize%2 == 0):
         ksize -= 1
-    # TODO aceitar só valores impares e a partir de 3. Por enquanto ele ta convertendo os pares para o impar antecessor
+        cv2.setTrackbarPos('Gaussian Kernel Size','FPI Video', ksize)
     return cv2.GaussianBlur(frame, (ksize, ksize), 0)
 
 def apply_grayscale(frame):
@@ -51,10 +54,14 @@ def mirror_video(frame):
     return cv2.flip(frame, mirroring_mode)
 
 def rotate_video(frame):
-    (h, w) = frame.shape[:2]
-    center = (w/2, h/2)
-    M = cv2.getRotationMatrix2D(center, rotation_mode * 90, 1.0)
-    return cv2.warpAffine(frame, M, (w,h))
+    # TODO deveria redimensionar a janela?
+    rotation = rotation_mode * 90
+    if rotation != 0:
+        (h, w) = frame.shape[:2]
+        center = (w/2, h/2)
+        M = cv2.getRotationMatrix2D(center, rotation_mode * 90, 1.0)
+        frame = cv2.warpAffine(frame, M, (w,h))
+    return frame
 
 cv2.namedWindow('FPI Video')
 cap = cv2.VideoCapture(0)
@@ -78,7 +85,7 @@ while(True):
         break
     elif c == ord('g'):
         apply_effects = apply_gaussian
-        cv2.createTrackbar('Gaussian Kernel Size','FPI Video', 3, 15, nothing)
+        cv2.createTrackbar('Gaussian Kernel Size','FPI Video', 3, 19, nothing)
     elif c == ord('c'):
         apply_effects = apply_canny
     elif c == ord('s'):
@@ -97,6 +104,14 @@ while(True):
     elif c == ord('z'):
         rotation_mode = (rotation_mode + 1) % 4
         apply_transforms = rotate_video
+    elif c == ord('o'):
+        """
+        TODO gravacao video
+        w=int(capture.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH ))
+        h=int(capture.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT ))
+        fourcc = cv2.cv.CV_FOURCC(*'XVID')
+        video_writer = cv2.VideoWriter("output.avi", fourcc, 25, (w, h))
+        """
 
 # When everything done, release the capture
 cap.release()
