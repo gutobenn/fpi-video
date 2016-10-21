@@ -27,11 +27,13 @@ def apply_gaussian(frame):
     return cv2.GaussianBlur(frame, (ksize, ksize), 0)
 
 def apply_grayscale(frame):
-    return cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    return cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
 
 def apply_canny(frame):
     blurred = cv2.GaussianBlur(frame, (3, 3), 0)
-    return auto_canny(blurred)
+    gray = auto_canny(blurred)
+    return cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
 
 def apply_sobel(frame):
     return cv2.Sobel(frame, cv2.CV_64F, 1, 0, 3) # Sobel X
@@ -83,7 +85,7 @@ def auto_canny(image, sigma=0.33):
 
 cv2.namedWindow('FPI Video')
 cap = cv2.VideoCapture(0)
-out = cv2.VideoWriter( time.strftime("%d_%m_%Y_at_%H_%M_%S") + '.avi',cv2.cv.CV_FOURCC(*'XVID'), 20.0, (640,480))
+out = cv2.VideoWriter( time.strftime("%d_%m_%Y_at_%H_%M_%S") + '.avi',cv2.cv.CV_FOURCC(*'XVID'), 10.0, (640,480))
 
 apply_effects = apply_none # points to function to be applied
 apply_transforms = apply_none  # points to function to be applied
